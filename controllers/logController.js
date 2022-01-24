@@ -6,6 +6,9 @@ router.get('/practice', validateJWT, (req, res) => {
     res.send('Practice route')
 });
 
+
+
+
 //! CREATE LOG:
 router.post('/create', validateJWT, async (req, res) => {
     const { description, definition, result } = req.body.log;
@@ -15,7 +18,7 @@ router.post('/create', validateJWT, async (req, res) => {
         description,
         definition,
         result,
-        owner: id
+        owner_id: id
     }
     try {
         const newLog = await LogModel.create(logEntry);
@@ -25,13 +28,16 @@ router.post('/create', validateJWT, async (req, res) => {
     }
 })
 
+
+
+
 //! GET LOG BY USER:
 router.get('/log', validateJWT, async (req, res) => {
     let { id } = req.user;
     try {
         const userLogs = await LogModel.findAll({
             where: {
-                owner: id
+                owner_id: id
             }
         });
         res.status(200).json(userLogs);
@@ -41,9 +47,11 @@ router.get('/log', validateJWT, async (req, res) => {
 });
 
 
+
+
 //! GET LOG BY ID:
 router.get('/:entryId', async (req, res) => {
-    const  entryId  = req.log.id;
+    const  entryId = req.params.entryId;
     try {
         const results = await LogModel.findAll({
             where: { id: entryId }
@@ -57,12 +65,8 @@ router.get('/:entryId', async (req, res) => {
 
 
 
-
-
-
-
 //! UPDATE LOG BY ID:
-router.put('/update/:entryId', async (req, res) => {
+router.put('/update/:entryId', validateJWT, async (req, res) => {
     const { description, definition, result } = req.body.log;
     const logId = req.params.entryId;
     const userId = req.user.id;
@@ -70,7 +74,7 @@ router.put('/update/:entryId', async (req, res) => {
     const query = {
         where: {
             id: logId,
-            owner: userId
+            owner_id: userId
         }
     };
 
@@ -91,24 +95,16 @@ router.put('/update/:entryId', async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
 //! DELETE LOG BY ID:
 router.delete('/delete/:entryId', validateJWT, async (req, res) => {
     const ownerId = req.user.id;
-    const logId = req.params.id;
+    const logId = req.params.entryId;
 
     try {
         const query = {
             where: {
                 id: logId,
-                owner: ownerId
+                owner_id: ownerId
             }
         };
 
